@@ -1,11 +1,17 @@
 # ML Design
 
-# Neural Networks and Deep Learning
-
-This is the first course of the deep learning specialization at [Coursera](https://www.coursera.org/specializations/deep-learning) which is moderated by [DeepLearning.ai](http://deeplearning.ai/). The course is taught by Andrew Ng.
+## MACHINE LEARNING DESIGN INTERVIEW
+_by Khang Pham_
 
 ## Table of contents
 
-* [Neural Networks and Deep Learning](#neural-networks-and-deep-learning)
-   * [Table of contents](#table-of-contents)
-   * [Course summary](#course-summary)
+* [Chapter 1]
+   * [Feature Selection and Feature Engineering](#feature-selection-and-feature-engineering)
+     - [Encoding](#encoding)
+    
+## Chapter 1
+
+## Feature Selection And Feature Engineering
+
+### Encoding
+
