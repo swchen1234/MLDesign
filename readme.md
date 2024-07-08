@@ -31,4 +31,7 @@ In practice, there are two ways to train embedding: pre-trained embedding i.e: w
 There are two ways to formulate the problems: Continuous Bag of Words
 (CBOW) and Skip-gram. For CBOW, we want to predict one word based on the surrounding words. For example, if we are given: word1 word2 word3 word4 word5, we want to use (word1, word2, word4, word5) to predict word3.
 CBOW. Source: Exploiting Similarities Among Languages for Machine Translation
+<img src="CBOW.png" width="500">
+
 In the skip-gram model, we use ’word3’ to predict all surrounding words ’word1, word2, word4, word5’.
+<img src="skip_gram.png" width="500">
