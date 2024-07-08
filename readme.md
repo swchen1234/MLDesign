@@ -23,3 +23,12 @@ When levels (categories) are not important, we can group them together in ”Oth
 
 * Feature Hashing
 Feature hashing, or hashing trick, converts text data, or categorical attributes with high cardinalities, into a feature vector of arbitrary dimensionality.
+ <img src="featureHashing.png" width="300">
+
+* Embedding
+In practice, there are two ways to train embedding: pre-trained embedding i.e: word2vec2 style or cotrained, (i.e., YouTube video embedding).
+
+There are two ways to formulate the problems: Continuous Bag of Words
+(CBOW) and Skip-gram. For CBOW, we want to predict one word based on the surrounding words. For example, if we are given: word1 word2 word3 word4 word5, we want to use (word1, word2, word4, word5) to predict word3.
+CBOW. Source: Exploiting Similarities Among Languages for Machine Translation
+In the skip-gram model, we use ’word3’ to predict all surrounding words ’word1, word2, word4, word5’.
