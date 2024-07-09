@@ -36,6 +36,10 @@ CBOW. Source: Exploiting Similarities Among Languages for Machine Translation
 In the skip-gram model, we use ’word3’ to predict all surrounding words ’word1, word2, word4, word5’.
 <img src="skip_gram.png" width="500">
 
+#### Companies using word2vec method to train embedding?
+- Instagram’s personalized recommendation model uses word2vec style where each user session can be viewed as: account 1 →\rightarrow account 2 →\rightarrow account 3 to predict accounts with which a person is likely to interact within a given session.
+- Pinterest Ads ranking uses word2vec style where each user session can be viewed as: pin A →\rightarrow pin B →\rightarrow pin C, then co- trained with multitask modeling.
+- DoorDash personalized store feed uses word2vec style where each user session can be viewed as: restaurant 1 →\rightarrow restaurant 2 → \rightarrow restaurant 3. This Store2Vec model can be trained to predict if restaurants were visited in the same session using CBOW algorithm.
 
 #### How does DoorDash Train Embedding?
 For each session, we assume users may have a certain type of food in mind, and they view store A, store B, etc. We can assume these stores are somewhat similar to the user’s interests. We can train a model to classify a given pair of stores if they show up in a user session. 
@@ -92,3 +96,17 @@ $$
 #### How does Pinterest Train Embedding?
 When users search for a specific image, Pinterest uses input pins visual embedding and search for similar pins. How do we generate visual embedding? Pinterest used image recognition deep learning architecture, e.g., VGG16, ResNet152, Google Net, etc., to fine tune on the Pinterest dataset. The learned features will then be used as embedding for Pins. 
 
+### How do we Evaulate the Quality of embedding?
+
+There are two methods:
+* Apply embedding to downstream tasks and measure their model performance. For certain applications, like natural language processing (NLP), we can also visualize embeddings using t-SNE (t-distributed stochastic neighbor embedding), EMAP.
+* Apply clustering (kmeans, k-Nearest Neighbor) on embedding data and see if it forms meaningful clusters.
+
+### Measuring Similarities
+
+- Dot Product
+- Cosine
+- Euclidian
+  
+* Dot product tends to favor embeddings with high norm. It’s more sensitive to the embeddings norm compared to other methods. Because of that it can create some consequences
+Popular content tends to have higher norms, hence ends up dominating the recommendations. 
