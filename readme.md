@@ -35,3 +35,30 @@ CBOW. Source: Exploiting Similarities Among Languages for Machine Translation
 
 In the skip-gram model, we use ’word3’ to predict all surrounding words ’word1, word2, word4, word5’.
 <img src="skip_gram.png" width="500">
+
+** How does DoorDash Train Embedding?
+
+LinkedIn used Hadamard product for Member Embedding and Job Embedding.
+The final prediction is a logistic regression on the Hadamard product between each seeker and job posting pair.
+
+$$[1234]⊙[5326]=[56624]$$
+
+$$  
+\begin{equation}
+  \begin{aligned}
+    \begin{bmatrix}
+    1 & 2\\ 
+    3 & 4 
+    \end{bmatrix}
+    \odot 
+    \begin{bmatrix} 
+    5 & 3 \\
+    2 & 6 
+    \end{bmatrix} = 
+    \begin{bmatrix} 
+    5 & 6\\ 
+    6 & 24 
+    \end{bmatrix}
+  \end{aligned}
+\end{equation}
+$$
