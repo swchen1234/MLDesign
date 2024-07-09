@@ -36,10 +36,36 @@ CBOW. Source: Exploiting Similarities Among Languages for Machine Translation
 In the skip-gram model, we use ’word3’ to predict all surrounding words ’word1, word2, word4, word5’.
 <img src="skip_gram.png" width="500">
 
-** How does DoorDash Train Embedding?
+
+#### How does DoorDash Train Embedding?
+For each session, we assume users may have a certain type of food in mind, and they view store A, store B, etc. We can assume these stores are somewhat similar to the user’s interests. We can train a model to classify a given pair of stores if they show up in a user session. 
+<img src="embedding_DoorDash.png" width="700">
+
+
+#### How does YouTube Train Embedding?
+
+Recommendation System usually consists of three stages: **Retrieval, Ranking and Re-ranking** (read Chapter [rec-sys]). In this example, we will cover how YouTube builds **Retrieval** (Candidate Generation) component using Two- tower architecture.
+
+We have two towers: left tower takes (users, context) as input and right tower takes movies as input.
+- Given input x (user, context), we want to pick candidate y (videos) from all available videos.
+- A common choice is to use Softmax function
+$$P(y| x; \theta) = \frac{e^{s(x, y)}}{\sum_{i=1} e^{s(x, y_i)}}$$
+- Loss function: use log-likelihood $$L = - \frac{1}{T} \sum_{i=1}^T \log(P(y_i|x_i;\theta))$$
+- As a result, the two-tower model architecture is capable of modeling the situation where the label has structures or content features.
+- StringLookup api maps string features to integer indices.
+- Embedding layer API turns positive integers (indexes) into dense vectors of fixed size.
+<img src="embedding_YouTube.png" width="700">
+
+* Key Questions:
+  - inventory too huge => Solution: for each mini-batch, we sampled data from our videos corpus as negative samples. One example is to use power-law distribution for sampling.
+  - When sampling, it’s possible that popular videos are overly penalized as negative samples in a batch. Does it introduce bias in our training data? One solution is to “correct” the logit output $$sc(xi,yj)=s(xi,yj) −\log(p_j)s^c(x_i, y_j) = s(x_i, y_j) - \log(p_j)$$. Here $p_j$ means the probability of selecting video j. 
+    
+#### How does LinkedIn Train Embedding?
 
 LinkedIn used Hadamard product for Member Embedding and Job Embedding.
 The final prediction is a logistic regression on the Hadamard product between each seeker and job posting pair.
+<img src="embedding_LinkedIn.png" width="700">
+
 
 $$[1234]⊙[5326]=[56624]$$
 
@@ -62,3 +88,7 @@ $$
   \end{aligned}
 \end{equation}
 $$
+
+#### How does Pinterest Train Embedding?
+When users search for a specific image, Pinterest uses input pins visual embedding and search for similar pins. How do we generate visual embedding? Pinterest used image recognition deep learning architecture, e.g., VGG16, ResNet152, Google Net, etc., to fine tune on the Pinterest dataset. The learned features will then be used as embedding for Pins. 
+
