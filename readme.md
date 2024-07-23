@@ -8,6 +8,8 @@ _by Khang Pham_
 * [Chapter 1]
    * [Feature Selection and Feature Engineering](#feature-selection-and-feature-engineering)
      - [Categorical Features](#categorical-features)
+* [Chapter 2]
+    * [Traning Pipeline](#traning_pipeline)
     
 ## Chapter 1
 
@@ -110,3 +112,24 @@ There are two methods:
   
 * Dot product tends to favor embeddings with high norm. It’s more sensitive to the embeddings norm compared to other methods. Because of that it can create some consequences
 Popular content tends to have higher norms, hence ends up dominating the recommendations. 
+
+### Numeric Features
+#### Normalization
+$$ v = \frac{v - \overrightarrow{v}_{min}}{\overrightarrow{v}_{max} - \overrightarrow{v}_{min}} $$
+#### Standardization
+$$ v = \frac{v - \overrightarrow{v}_{mean}} {\overrightarrow{v}_{std}}
+
+If the feature distribution resembles power laws we can transform it by using the formula: $ \log(1+v1+median_of_v)\log\left(\frac{1 + v}{1 + \text{median\_of\_}v}\right)$. In practice, normalization can cause an issue because the values of min and max are usually outliers. One possible solution is “clipping”, where we pick a “reasonable” value for min and max.
+
+# Chapter 2
+## Traning Pipeline
+
+### Handle Imbalance Class Distribution
+* Use class weights in the loss function
+  - `loss_function = -w0 * ylog(p) - w1*(1-y)*log(1-p)`
+* Use naive resampling
+  - It’s important to have validation data and test data intact (no resampling).
+* Use synthetic resampling: synthetic minority over-sampling technique (SMOTE)
+  - It works by randomly picking a point from the minority class and computing the k-nearest neighbors for this point. The synthetic points are added between the chosen point and its neighbors. 
+  - In practice, this method is not commonly used, especially for large-scale applications.
+    <img src="smote.png" width="500">
