@@ -191,7 +191,28 @@ $$ \L = \max(0, 1- y \dot \hat{y}) $$
 
 
 ### Metrics Evaluation
-#### MAP
+#### Offline
+* e.g. $R^2$, MAE/MSE, Log Loss
+* ROC - AUC
+  `TP vs FP`
+* PR - AUC
+  `Precision vs Recall`
+  - Equivalent to 
+* Precision vs Recall vs F1
+  <img src="precision_recall_graph.png" width="500">
+  <img src="precision_recall.png" width="500">
+  <img src="f_score.png" width="500">
+* Precision@k, Recall@k
+* MAP
+* Mean Reciprocal Rank(MRR)
+  - It’s more popular in the research community. It measures how far down the ranking the FIRST relevant document is. If MRR is close to 1, it means relevant results are close to the top of search results. Lower MRR indicates poorer search quality, with the right answer farther down in the search results.
+  $$ MRR = \frac{1}{n} \sum_{i=1}^n\frac{1} {\text{rank}_i} $$
+  - If you care about more than one correct result, you should NOT use this metric.
+
+  
+  
+  
+  
 
 
 
