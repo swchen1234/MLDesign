@@ -220,10 +220,33 @@ $$ \L = \max(0, 1- y \dot \hat{y}) $$
 
 * Common Online Metrics: Click-Through Rate, Like-Through Rate, user spent time, user survey response etc..
 
+## Sampling Strategies
 
+### Random Sampling
+While it sounds naive, it’s still very viable for many machine learning applications. For example, to collect training data for user embedding for recommending videos, we can randomly select any not-yet- seen videos from the videos repository as negative samples. 
+
+### Rejection Sampling
+* 若分布$\f(x)$难以生成，可以生成替代g(x)（如uniform, normal), 找到C 使得C >= f(x)/g(x) at any x,
+  1）每一步，生成z ~ uniform(0, Cg(x)), x ~ g(x).
+  2） 若z < f(x) => accept; 否则，扔掉
+* **Ref** [What is Rejection Sampling?](https://towardsdatascience.com/what-is-rejection-sampling-1f6aff92330d)
   
-  
- 
+### Weighted Sampling
+If each item has an associated weight and the probability of each item to be selected is determined by these item weights, then the problem is called weighted random sampling.
+**TODO**
+* Weighted Sampling Algorithm
+* Implementation in SQL
+
+### Important Sampling
+<img src="importance_sampling.png" width="600">
+**Ref** [Importance Sampling Explained End to End](https://medium.com/@liuec.jessica2000/importance-sampling-explained-end-to-end-a53334cb330b)
+
+#### Stratified Sampling
+<img src="stratified_sampling.png" width="500">
+
+#### Reservoir Sampling
+<img src="resevior_sampling.png" width="500">
+
     
     
   
