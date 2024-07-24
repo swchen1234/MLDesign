@@ -187,6 +187,8 @@ $$ \L = \max(0, 1- y \dot \hat{y}) $$
 ### Metrics Evaluation
 #### Offline
 * e.g. $R^2$, MAE/MSE, Log Loss
+
+##### Precision & Recall
 * ROC - AUC
   `TP vs FP`
 * PR - AUC
@@ -198,12 +200,32 @@ $$ \L = \max(0, 1- y \dot \hat{y}) $$
   <img src="f_score.png" width="200">
 * Precision@k, Recall@k
 * MAP
-* Mean Reciprocal Rank(MRR)
+##### Mean Reciprocal Rank(MRR)
   - It’s more popular in the research community. It measures how far down the ranking the FIRST relevant document is. If MRR is close to 1, it means relevant results are close to the top of search results. Lower MRR indicates poorer search quality, with the right answer farther down in the search results.
-  $$ MRR = \frac{1}{n} \sum_{i=1}^n\frac{1} {\text{rank}_i} $$
+  $$MRR = \frac{1}{n} \sum_{i=1}^n\frac{1} {\text{rank}_i}$$
   - If you care about more than one correct result, you should NOT use this metric.
 
+##### Cumulative Gain
+  - Cumulative gain (CG) is the sum of the graded relevance values of all results in a search result list. $CG = \sum_{i} rel_i$
+  - To reflect the importance of position => **Discounted Cumulative Gain(DCG)**
+<img src="dcg.png" width="200">
+  - To compare ranking on different things => **Normalized Discounted Cumulative Gain(DCG)**
+<img src="ndcg.png" width="200">
+  - **ref** [Statistical Stories - NDCG (Normalized Discounted Cumulative Gain)](https://medium.com/@Currie32/statistical-stories-ndcg-normalized-discounted-cumulative-gain-0be22d61a87d)
+ 
+#### Online
+1. During the staging phase, we measure metrics such as a lift in revenue or click-through rate to evaluate how well the model recommends relevant content to users.
+2. Consequently, we evaluate the impact on business metrics. If the observed revenue-related metrics show consistent improvement, it is safe to gradually expose the model to a larger percentage of real traffic.
+3. Finally, when we have enough evidence that new models have improved revenue metrics, we can replace current production models with new models.
+
+* Common Online Metrics: Click-Through Rate, Like-Through Rate, user spent time, user survey response etc..
+
+
   
+  
+ 
+    
+    
   
   
   
