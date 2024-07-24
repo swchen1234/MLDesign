@@ -157,7 +157,7 @@ $$ MAE=1N∑i=1n|targeti−predictioni|MAE = \frac{1}{N} \sum_{i=1}^n |\text{tar
 
 #### Huber Loss
 Huber Loss fixed the outlier-sensitive problem of MSE, and it’s also differentiable at 0. if the error is not too big, Huber loss uses MSE; otherwise, it’s just MAE with some penalty.
-<img src="huber_loss.png" width="500">
+<img src="huber_loss.png" width=500">
 
 #### Quantile Loss
 In certain applications, we value underestimation vs. overestimation differently. Quantile loss can give more value to positive error or negative error. 
@@ -177,18 +177,12 @@ where $p_{base}$ is the probabily of positive samples.
 #### Focal Loss
 All the hard(or misclassified — false negatives) samples are given more weight while learning than easy(correctly classified — true negatives) examples. $\alpha$ and $\gamma$ are both hyperparemeter, $\gamma$ control the penality given to the misclassified samples.
 
-<img src="focal_loss.png" width="500">
+<img src="focal_loss.png" width="200">
 
 #### Hinge Loss
 The hinge loss is a special type of cost function that not only penalizes misclassified samples but also correctly classifies ones that are within a defined margin from the decision boundary. It is first used in SVM.
 $$ \L = \max(0, 1- y \dot \hat{y}) $$
-<img src="hinge_loss.png" width="500">
-
-
-
-
-
-
+<img src="hinge_loss.png" width="300">
 
 ### Metrics Evaluation
 #### Offline
@@ -199,9 +193,9 @@ $$ \L = \max(0, 1- y \dot \hat{y}) $$
   `Precision vs Recall`
   - Equivalent to 
 * Precision vs Recall vs F1
-  <img src="precision_recall_graph.png" width="500">
-  <img src="precision_recall.png" width="500">
-  <img src="f_score.png" width="500">
+  <img src="precision_recall_graph.png" width="200">
+  <img src="precision_recall.png" width="200">
+  <img src="f_score.png" width="200">
 * Precision@k, Recall@k
 * MAP
 * Mean Reciprocal Rank(MRR)
