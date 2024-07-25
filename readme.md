@@ -10,6 +10,8 @@ _by Khang Pham_
      - [Categorical Features](#categorical-features)
 * [Chapter 2]
     * [Training Pipeline](#training_pipeline)
+    * [A/B Testing Fundamental](#a_b_testing_fundamental)
+    * [Common Deployment Patterns](#common_deployment_patterns)
     
 ## Chapter 1
 
@@ -242,22 +244,157 @@ If each item has an associated weight and the probability of each item to be sel
 **Ref** [Importance Sampling Explained End to End](https://medium.com/@liuec.jessica2000/importance-sampling-explained-end-to-end-a53334cb330b)
 
 #### Stratified Sampling
-<img src="stratified_sampling.png" width="500">
+<img src="stratified_sampling.png" width="300">
 
 #### Reservoir Sampling
-<img src="resevior_sampling.png" width="500">
+<img src="resevior_sampling.png" width="300">
 
-    
-    
+## Common Deep Learning Model Architecture
+### Wide and Deep Architecture    
+Wide and Deep architecture can help achieve both memorization and generalization.
+* Memorization helps model to learn the frequent co-occurrence of items or features and exploiting the correlation available in the historical data.
+* Generalization helps model to explore new feature combinations that rarely occurred in the past.
+<img src="deep_wide.png" width="300">
+
+### Two Tower Achitecture
+Given input data of user, context (time of day, user’s device) and items, a common solution to build a scalable retrieval model is:
+* Learn query and item representations for user, context and item respectively.
+* Use a simple scoring function (e.g., dot product) between query and item representations to get recommendations tailored for the query.
+
+The representation learning problem is typically challenging in two ways:
+* There are many items in the corpus: hundreds of millions of YouTube videos, millions of Places on Facebook etc.
+* Long-tail problem: training data collected from users’ feedback is very sparse for most items.
+<img src="two_tower.png" width="300">
+
+### Deep Cross Network
+As we discussed in the Cross Features [crossed-features] section, we often have a lot of sparse features in web applications. For example, in an ecommerce website, we might have purchased_bananas and purchased_cooking_books features in our dataset. If a customer purchased both bananas and a cookbook, then this customer will likely be interested in purchasing a blender. We also see how Wide and Deep architecture can take advantage of cross features in [sec- wide-and-deep] section. In practice, there can be hundreds or thousands of features which make is very difficult to decide which features to use in the "wide" input of the network.
+Deep Cross Network V225 (DCN) was designed to learn explicit cross features more effectively.
+<img src="dcn.png" width="500">
+<img src="dcn2.png" width="500">
+
+**Benefits**
+* DCN v2 automatically learns cross features and improves model performance compared to traditional DL architecture.
+* Google uses DCN v2 in their production use cases. When compared with A production model, DCN-V2 yielded 0.6% AUCLoss (1 - AUC) improvement. For this particular model, a gain of 0.1% on AUCLoss is considered a significant improvement.
+* It’s better to insert the cross layers in between the input and the hidden layers of DNN (stacked-based).
+* In practice, using two cross-layers yields the best model performance.
+* Using low-rank DCN with rank (input size)/4 can preserve model accuracy.
+
+### Multitask Learning
+**Benefits**
+* Share bottom layers help us leverage learned representation from other tasks.
+* Train model and ability for multiple tasks.
+* We can also combine p(like) and p(comment) in the ranking phase, e.g, rank items based on weighted combination of p(like) and p(comment).
+
+How can you “blend” results together? For example, videos and photos have very different distribution for possible actions (like/comment).
+Read more Lessons learned at Instagram26.
+`How Instagram “blend” video and photos in their recommendations? Instagram maps the probability (such as p(like)) to a reasonably well-behaved distribution such as a Gaussian. Now it’s straightforward to compare and blend the results.`
+
+### An Example
+#### Facebook Deep Learning Recommendation Model (DLRM)**
+**Requirements and Data**
+Recommend products to people, for example, which qualified ads to show to Facebook users. In this problem, we want to maximize the engagements, such as increasing the Click-through rate (CTR).
+**Metrics**
+We utilize accuracy, AUC since our use case is binary classification: if the user clicks or does not click on a particular product.
+**Features**
+* Categorical features: went through embedding layers with the same dimensions as we described in [subsec-embedding] section.
+* Continuous features: went through a multilayer perceptron (MLP), which will yield a dense representation of the same length as the embedding vectors.
+**Model**
+DL for recommendation
+Op here can be concat, dot product or sum.
+After all features are transformed through MLP, we apply Op and the output will be transformed through another MLP.
+Finally, we fed the output through the Sigmoid layer.
+<img src="dcn2.png" width="400">
+
+## A/B Testing Fundamental
+There are two popular ways to perform A/B testing: general A/B testing and budget-splitting A/B testing. In normal A/B testing, users are split into two groups: control and treatment. The control group contained users with the current production model and the treatment group contained users with the new model. One problem with this setting is in Ads Marketplace industry, it’s common to see control groups and treatment groups "fight" for the same budget. So during the test, when we observed increase “revenues” it can simply mean budget “shift” between groups.  One solution is budget-splitting. (**TODO: 不理解**）
+* **Budget-Splitting**
+<img src="budgetSplit_ab.png" width="400">
+* First, we split members into control group and treatment group. Each group has the same number of members.
+* Then, we split the budget of each ad campaign into two “sub- campaigns”. Each “sub-campaign” has 50% of the original campaign’s budget.
+* Finally, we assign one of these sub-campaigns to the treatment member group and the other to the control member group.
+
   
+**Benefits**
+The two sub-campaigns act independently, so they can’t compete for budget between treatment and control members.
+ These tests run with a large member population, which improves the statistical significant of our experiment.
+
+## Common Deployment Patterns
+### Imbalance Workload
+We usually use similar architecture in Load Balancer, which is also sometimes called Aggregator Service or Broker.
+<img src="aggregated_service.png" width="400">
+
+* Client (upstream process) sends request to Aggregator Service.
+* If workload is too high, Aggregator Service splits the workload and assigns to some workers in the Worker pool.
+* Aggregator Service can pick workers by workload, round-robin, or request parameter.
+Wait for response from workers. Forward response to client.
+
+### Serving Logics and Multiple Models
+For any business driven system, it’s important to be able to change logic in serving models. For example, depending on the type of Ads candidates, we will route to a different model to get a score. In practice, we can sometime see multiple models, each model serve some specific cohorts of users. The disadvantage is that it increases complexity, and we might not have enough data to train multiple models.
+<img src="serve_multiple_models.png" width="300">
+
+### Offline Serving
+* Once the model is trained, we have two subgraphs: one subgraph for the user and one subgraph for the job posting.
+* The subgraphs are versioned, packaged, and distributed for offline serving.
+* Then, we stored precomputed embeddings in Frame Feature Marketplace.
+
+### Nearline Serving
+<img src="linkedin_serving.png" width="400">
+When a job is posted, a nearline feature standardization process runs and produces input for the embedding model.
+Once standardization processes are completed, all registered models are loaded and executed in parallel.
+Once we have the embeddings, we batch and store them in key-value storage and Kafka topic to be published in Frame Feature Marketplace.
+
+### Approximate Nearest Neighbor Search
+One popular application of embedding is approximate nearest neighbor search (ANN). For a large dataset with hundreds of millions or billions of items (e.g., users, movies, etc.), searching for similar objects based on their embeddings is challenging. There are two common libraries: Facebook AI Similarity Search (FAISS31) and Google ScaNN32.
+
+### An Example
+<img src="highlevel_deployment.png" width="400">
+* Database: stores ad campaign data, ad creative data, and user information, etc.
+* Model Storage: stores persisted machine learning model. One example is to store a trained model in AWS S3 with timestamps so the ranking service can pull the latest model.
+* It’s desirable to have a separated retrieval service and ranking service because they usually have different scalability requirements. In practice, they are usually built by different teams with different technical stacks.
+In Ad ranking use cases, we typically have less frequently changed features (user home country) and frequently changed features (number of clicks in the last 3 hours, last 24 hours, etc). One way to update near real time features is to use Amazon DynamoDB.
+
+**Why don’t we prepare input data in the ranking service? **
+* Pros:
+  - Make it easier to release versioned and ship models. With a framework like TensorFlow Transform, we can encapsulate all feature processing steps in TensorFlow Graph.
+  - Make it easier to change the backend database without affecting any machine learning models. Decouple the retrieval service with ranking service, therefore, improving overall system throughput and latency.
+* Cons: Prone to training-serving skew, for example: data is processed differently between training and serving.
+
+**How do we handle training-serving skew? **
+One simple solution is to log all processed data into log files.
+**What if the logged files are too big, and we run out of disks?**
+One simple solution is to use log rotating. In Kubernetes, you can redirect any output generated to a containerized application’s stdout and stderr streams. For example, the Docker container engine redirects those two streams to a logging driver, which is configured in Kubernetes to write to a file in JSON format. There are three options to implement this:
+* Option 1: Use a node-level logging agent that runs on every node.
+* Option 2: Include a dedicated sidecar container for logging in an application pod.
+* Option 3: Push logs directly to a backend from within an application.
+
+**How do we scale the retrieval service? What if we have too many requests?**
+* Option 1: Manually tune a fixed number of pods/instances on the cluster
+* Option 2: Use Kubernetes autoscaling. We have two options: 1. Demand base if requests > threshold then scale up; scale down using cool down events. 2. Other auto scaling modes based on CPU or memory metrics are less effective.
+* To make autoscaling work, we need to have:
+  - Retrieval service and other down-stream tasks are stateless.
+  - All services must support graceful shutdown otherwise, we won’t know how to store states.
+  - Service should have similar performance instances.
+  - Load balancer is NOT a single point of failure. It’s usually downstream services that are the bottlenecks.
+Concretely, one Kubernetes pod will look like this:
+<img src="kb_pot.png" width="300">
+
+### An Example
+#### Spotify: one simple mistake took four months to detect
+<img src="training_serving_skew.png" width="300">
+* Training pipeline reads raw data, performs feature transformation, train model and save model to Model Storage.
+* Online serving: a recommendation service (run on different infrastructure), transform feature then give predictions.
+* Problem arises when Feature Transform in Online Serving is implemented differently.
+* As a result, input data is different during training vs. serving. This **training-serving skew problem** is very common in practice, especially when serving is implemented by different teams.
+* The discrepancy implementation is just a few lines of code but it impacts model recommendations severely. This issue happened for four months before they can detect it.
   
+**Solutions**
+There are two main solutions: 1/ one transformation for both training and serving and 2/ use feature logging. Spotify decides to use feature logging (see 1.5 diagram).
+* Implement feature transform in Java.
+* Log already transformed features at serving stage. _This is important because the up-stream service used for feature transform is owned by different teams. If we log features at up-stream services, it’ll be difficult for Machine Learning team to own and make any changes._
+* Feature logs will be used later for training.
+* Distribution Monitoring: Use Tensorflow Data Validation (TFDV) to compare training and serving data schemas and feature distribution regularly. Set up alert to detect feature drift (using Chebyshev distance metric).
+
   
-
-
-
-
-
-    
 
 
 
