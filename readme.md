@@ -394,7 +394,56 @@ There are two main solutions: 1/ one transformation for both training and servin
 * Feature logs will be used later for training.
 * Distribution Monitoring: Use Tensorflow Data Validation (TFDV) to compare training and serving data schemas and feature distribution regularly. Set up alert to detect feature drift (using Chebyshev distance metric).
 
-  
+# Common Recommendation System Components
+Recommendation systems typically consist of the following components: candidate generation, ranking (scoring), and re- ranking.
+* Candidate generation: we start from a huge list of candidates and generate a much smaller subset of candidates. For example, the candidate generator on YouTube reduces billions of videos down to hundreds or thousands.
+* Ranking (Scoring): another ML model scores and ranks the candidates in order to select the set of items (on the order of 10) to display to the user. Given the candidate list is relatively small, we can use a more precise model.
+* Re-ranking: we remove items that the user explicitly disliked or boost the score of fresher content or remove political content, etc. Re-ranking can also help ensure diversity, freshness, and fairness.
+
+## Candidate Generation
+Candidate generation is an important step before the ranking step. There are two common approaches: content-based filtering and collaborative filtering.
+<img src="video_rec.png" width="500">
+
+### Content-Based Filtering
+The main idea is to rely on what content (or videos) users like in the past and then recommend similar content to users.
+<img src="content_based" width="500">
+**Trade-Offs**
+**Pros**
+It’s easier to scale since we don’t use another user’s features.
+* The model can recommend specific interests of a user and niche content to the other very few users who are interested.
+* First, we pick a similarity metric (for example: dot product), then we score each candidate using a similarity metric (dot product). Candidates with higher dot product values will get higher ranking in recommendations.
+**Cons**
+The model can only recommend content based on the user’s existing interests and does not expand the user’s interests.
+The model doesn’t leverage other user’s features.
+
+**Collaborative Filtering**
+To address some of the limitations of content-based filtering, collaborative filtering simultaneously uses similarities between users and items to make recommendations. The basic idea is to recommend an item to user A based on the interests of a similar user B.
+<img src="cf.png" width="500">
+Collaborative Filtering uses Matrix Factorization technique to derive these matrices.
+Given the feedback on matrix AA, how can we calculate the two matrices UU and VV so that: UVT∼AU{V}^T \sim A
+* There are two common algorithms: Stochastic gradient descent (SGD) and Weighted Alternating Least Squares (WALS).
+
+### Examples
+#### How Pinterest Does Candidate Generation 
+
+***Co-occurrences of Items to Generate Candidates**
+If a pair of Pins appear together many times, we can argue they are semantically similar. 
+**Online Random Walk**
+The previous approach doesn’t maximize the co-occurrence of related pins. Rare pins, pins occurring on only a few boards, did not have many
+candidates. With online random walk4, given a pins-board bipartite graph we can load all of these connections into memory and do random walk. Given an input pin, we can walk in the graph and increase visit counts for each visited pin. After a number of steps, we have aggregated counts of relevant pins. This is similar to Google PageRank approach.
+**Session Co-occurrence**
+The previous approach considers Pins on the same board and semantically similar. In reality, a lot of long-lived boards are too broad and are usually a collection of relevant Pins. To address this problem, we can use Pins2Vec, similar to how we train embedding with word2vec style
+
+#### How YouTube Build Video Recommendation Retrieval Stack
+YouTube video recommendation retrieval stack (candidate generation5) is quite comprehensive. It uses multiple candidate generation algorithms, each capturing one aspect of similarity between query video and candidate video.
+* For example, one algorithm generates candidates by matching topics of query video.
+* Another algorithm retrieves candidate videos based on how often the video has been watched together with the query video.
+They applied collaborative filtering and two-tower style embedding.
+<img src="youtube_retrival.png" width="500">
+
+
+
+
 
 
 
