@@ -441,9 +441,89 @@ YouTube video recommendation retrieval stack (candidate generation5) is quite co
 They applied collaborative filtering and two-tower style embedding.
 <img src="youtube_retrival.png" width="500">
 
+### Ranking
+At the high level, a recommendation problem can be formulated as: point- wise ranking, pairwise ranking and list-wise ranking. While the point-wise ranking is the most popular formulation (read YouTube Recommendation WatchNext paper6).
+
+* **Point-wise approach**: given a search query, we train a Machine Learning model to predict their ranking. Given the list of results from a specific query, assume we have a Machine Learning model that predict the ranking for each result. Based on the prediction, we can then sort the results based on their rankings.
+
+* **Pairwise approach**: with this formulation, we don’t really need to predict every result’s ranking. All we really need to know is which result has higher rank than the other result.
+
+In certain situations, point-wise ranking is very challenging. Not only do we need an abundance label (actual ranking of every possible result), we also need to build a model to do ordinal regression, which is unnecessarily hard. On the other hand, a naive pairwise approach would require a lot of computation. 
+
+In practice, pairwise learning scores relatively high in terms of AUC but does poorly on nDCG, even with calibration. Therefore, pairwise learning gives a good ranking of ads but fails at estimating the click probability. This is due to its objective of incurring less ranking loss by attempting to give a correct order of ads, however, without taking into account the accurate estimation of click probability.
+#### An Example: RankNet
+At the core RankNet7 proposes the following considerations
+The pairs of ranks do not need to be complete: they do NOT need to
+specify a complete ranking of the training data.
+The ranking results do NOT need to be consistent.
+
+## Re-ranking
+
+In the final stage of a recommendation system, the system can re-rank the candidates to consider additional criteria or constraints.
+* One re-ranking approach is to use filters that remove some candidates.
+* Another re-ranking approach is to manually transform the score returned by the ranker.
+* Detect and remove click-bait content
+* Re-rank content based on content age (promote freshness), content length, etc.
+
+在re-ranking阶段需要注意
+* freshness
+* diversity
+* fairness
+
+### Position Bias
+Reason: our training data has positive labels simply because the results show up on top.
+解决方案：
+ A commonly used practice is to inject position as an input feature in model training and then remove the bias(set value to 1) at serving.
+``` Instagram uses sparse position feature as input to the last fully connected layer to handle position bias.```
+
+1. Absolutepositioning:w=1+pw=1+p
+2. Log:w=log(beta+p)w=log(beta+p)
+3. w=1−1alpha+pw=$1-\frac{1}{alpha+p}$
+
+#### An Example: LinkedIn's People You May Know(PYMK)
+LinkedIn People You May Know (PYMK) is a feature that recommends relevant connections that users may know. The goal is to help users enrich their professional network and increase users’ engagements.为了防止向用户推荐其不感兴趣的人，可以在把最后推荐的结果加上impression discount(出现越多的人discount越多）
+
+### Calibration
+It is the ratio of the number of expected clicks to the number of actually observed clicks.
+$$ Calibration=sum(predictions)/sum(labels)\text{Calibration} = \text{sum(predictions)} / \text{sum(labels)}$$
+
+_When calibration is important?_
+* If we’re building a critical system where the actual prediction value is important, for example: the probability of patient being sick.
+* We want to debug if model is over-confident with wrong prediction or under-confident with correct prediction.
+  
+_Causes of miscalibration_
+* Model generalization: model makes poor predictions on new data.
+* Nonstationarity: changes in user behavior or marketplace that are not modeled.
+* Selection bias: during generating training data, we resample data (up- sampling minority samples and/or downsampling majority samples).
+* Training/serving misalignment: model was trained to predict a different label than the calibration label.
+
+Using AUC metric alone in this case is not sufficient, we need to check the prediction distribution. One way to do that is to use calibration plot.
+<img src="calibration_lr" width="300"> <img src="calibration_svm" width="300">
+
+There are many ways to calibrate model: apply isotonic14 method or Platt’s15 method.
+* Isotnic method is a non-parametric method which minimizes $\sum\limits_{i = 1}^{N} {actual_i-prediction_i)^2}$. The only restriction is that the mapping function is monotonically increasing
+* Platt’s method is based on Platt’s logistic model $p(actual_i=1|predict_i) = \frac{1}{1+exp^{A*predict_i + B}}$
+where A, B are real numbers to be determined when fitting the regressor via maximum likelihood.
+
+### Nonstationary Problem
+Data distribution shift (joint distribution of inputs and outputs differs between the training and test stages) is very common. Based on how frequently the model performance degrades, we can then decide how often models need to be updated/retrained. One common algorithm that can be used is **Bayesian Logistic Regression**.[Ref](https://github.com/linkedin/lambda-learner/)
+
+### Exploration vs. Exploitation
+One common technique is Thompson Sampling[Ref](https://www.microsoft.com/en-us/research/wp-content/uploads/2016/02/thompson.pdf), where at time tt, we need to decide which action to take at time tt based on the reward.
 
 
-
-
+# Interview Exercises
+1. Recommend interesting places near me on Facebook. At the beginning, how do we sample positive and negative labels?
+2. Design Machine Learning system to predict the number of people who will attend a Facebook event.
+3. Design Machine Learning model to detect whether a human object detection system was actually detecting real life humans or humans on a tv/poster. Hint: leverage depth information.
+4. DesignfeedrankingforFacebook.
+5. Design Machine Learning model to detect illegal (or contraband) goods on Facebook Marketplace.
+6. Design Job Suggestions Machine Learning model for LinkedIn members.
+7. Designfeedrecommendationfromnon-friendsonFacebook.
+8. Design ML system to classify LinkedIn job seniority for all jobs in all countries and companies.
+9. DesignSmartNotificationforTwitterusers.
+10. Design a ML system to filter out videos with irrelevant hashtags on TikTok.
+11. Predictfoodcategorygivenaphrase(notuserspecific)inInstacartapp.
+12. Design a ML system for DoorDash users’ demand prediction for one week in advance.
 
 
